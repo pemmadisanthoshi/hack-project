@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zero Waste Food Tracker</title>
+  <style>
+    body { font-family: Arial; background: #f5f5f5; padding: 20px; }
+    h1 { color: #2e7d32; }
+    input, button { padding: 10px; margin: 5px; }
+    .food-list { margin-top: 20px; }
+    .food-item { background: #fff; padding: 10px; margin-bottom: 10px; border-left: 5px solid #4caf50; }
+  </style>
+</head>
+<body>
+  <h1>Zero Waste Food Tracker</h1>
+  <input type="text" id="foodName" placeholder="Food Name" />
+  <input type="date" id="expiryDate" />
+  <button onclick="addFood()">Add</button>
+
+  <div class="food-list" id="foodList"></div>
+
+  <script>
+    let foodItems = [];
+
+    function addFood() {
+      const name = document.getElementById('foodName').value;
+      const date = document.getElementById('expiryDate').value;
+
+      if (name && date) {
+        foodItems.push({ name, date });
+        renderList();
+      }
+    }
+
+    function renderList() {
+      const list = document.getElementById('foodList');
+      list.innerHTML = '';
+      foodItems.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'food-item';
+        div.innerHTML = `<strong>${item.name}</strong> - Expires on: ${item.date}`;
+        list.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>
