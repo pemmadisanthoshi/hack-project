@@ -1,48 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Zero Waste Food Tracker</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bewell Dashboard</title>
   <style>
-    body { font-family: Arial; background: #f5f5f5; padding: 20px; }
-    h1 { color: #2e7d32; }
-    input, button { padding: 10px; margin: 5px; }
-    .food-list { margin-top: 20px; }
-    .food-item { background: #fff; padding: 10px; margin-bottom: 10px; border-left: 5px solid #4caf50; }
+    :root {
+      --accent:#4CAF50;
+      --muted:#6b7280;
+      --bg:#f6fbf7;
+      --card:#ffffff;
+      --danger:#ef4444;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; display: flex; height: 100vh; font-family: inherit; background: var(--bg); color: #0f172a; }
+
+    /* Sidebar */
+    .sidebar { width: 220px; background: var(--accent); color: white; display: flex; flex-direction: column; }
+    .sidebar h2 { text-align: center; padding: 20px 0; margin: 0; }
+    .sidebar a { color: white; padding: 12px 20px; text-decoration: none; display: block; cursor: pointer; }
+    .sidebar a:hover { background: rgba(255,255,255,0.2); }
+
+    /* Main */
+    .main { flex: 1; padding: 20px; overflow-y: auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; }
+    .header button { background: var(--danger); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+
+    /* Cards */
+    .card { background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 6px 18px rgba(16,24,40,0.06); }
+
+    /* Forms */
+    input, select, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #e6eef2; font-size: 14px; }
+    button.btn-primary { background: var(--accent); color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; }
+    button.btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); cursor: pointer; padding: 10px 16px; border-radius: 6px; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
-  <h1>Zero Waste Food Tracker</h1>
-  <input type="text" id="foodName" placeholder="Food Name" />
-  <input type="date" id="expiryDate" />
-  <button onclick="addFood()">Add</button>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>Bewell</h2>
+    <a onclick="showSection('profile')">Profile</a>
+    <a onclick="showSection('recommendations')">Food Recommendations</a>
+    <a onclick="showSection('history')">History</a>
+    <a onclick="showSection('settings')">Settings</a>
+  </div>
 
-  <div class="food-list" id="foodList"></div>
+  <!-- Main Content -->
+  <div class="main">
+    <div class="header">
+      <h1>Dashboard</h1>
+      <button onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Sections -->
+    <div id="profile" class="card section">
+      <h2>User Profile</h2>
+      <form id="bewellForm">
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="number" id="age" placeholder="Age" required>
+        <input type="text" id="location" placeholder="Location" required>
+        <select id="goal" required>
+          <option value="">Health Goal</option>
+          <option value="weight_loss">Weight Loss</option>
+          <option value="muscle_gain">Muscle Gain</option>
+          <option value="balanced_diet">Balanced Diet</option>
+        </select>
+        <textarea id="conditions" placeholder="Medical Conditions (optional)"></textarea>
+        <button type="submit" class="btn-primary">Save & Get Recommendations</button>
+      </form>
+    </div>
+
+    <div id="recommendations" class="card section hidden">
+      <h2>Food Recommendations</h2>
+      <div id="recommendationsDiv">Your recommended foods will appear here.</div>
+    </div>
+
+    <div id="history" class="card section hidden">
+      <h2>History</h2>
+      <div id="historyDiv">No previous history found.</div>
+    </div>
+
+    <div id="settings" class="card section hidden">
+      <h2>Settings</h2>
+      <button onclick="clearHistory()" class="btn-outline">Clear History</button>
+    </div>
+  </div>
 
   <script>
-    let foodItems = [];
-
-    function addFood() {
-      const name = document.getElementById('foodName').value;
-      const date = document.getElementById('expiryDate').value;
-
-      if (name && date) {
-        foodItems.push({ name, date });
-        renderList();
-      }
+    // Section switch
+    function showSection(id){
+      document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
     }
 
-    function renderList() {
-      const list = document.getElementById('foodList');
-      list.innerHTML = '';
-      foodItems.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.className = 'food-item';
-        div.innerHTML = `<strong>${item.name}</strong> - Expires on: ${item.date}`;
-        list.appendChild(div);
-      });
+    // Logout
+    function logout(){
+      location.reload();
     }
+
+    // Form handling & recommendations
+    const bewellForm = document.getElementById('bewellForm');
+    const recommendationsDiv = document.getElementById('recommendationsDiv');
+    const historyDiv = document.getElementById('historyDiv');
+
+    bewellForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const age = document.getElementById('age').value;
+      const location = document.getElementById('location').value;
+      const goal = document.getElementById('goal').value;
+      const conditions = document.getElementById('conditions').value;
+
+      let rec = '';
+      if(goal==='weight_loss') rec = '🥗 Oats, Green Salads, Steamed Vegetables, Grilled Chicken.';
+      else if(goal==='muscle_gain') rec = '🍗 Eggs, Chicken Breast, Paneer, Protein Shakes, Nuts.';
+      else if(goal==='balanced_diet') rec = '🍎 Fruits, Whole Grains, Lean Proteins, Vegetables, Dairy.';
+      else rec = '⚠ Please select a valid goal.';
+
+      recommendationsDiv.textContent = rec;
+      showSection('recommendations');
+
+      // Save history
+      let history = JSON.parse(localStorage.getItem('bewell_history') || '[]');
+      history.push({name, age, location, goal, conditions, rec, date: new Date().toLocaleString()});
+      localStorage.setItem('bewell_history', JSON.stringify(history));
+      renderHistory();
+    });
+
+    function renderHistory(){
+      const history = JSON.parse(localStorage.getItem('bewell_history') || '[]');
+      if(history.length===0) historyDiv.textContent = 'No previous history found.';
+      else historyDiv.innerHTML = history.map(h => `<p><b>${h.date}</b>: ${h.name} (${h.goal}) → ${h.rec}</p>`).join('');
+    }
+
+    function clearHistory(){
+      localStorage.removeItem('bewell_history');
+      renderHistory();
+      alert('History cleared');
+    }
+
+    // Load history on start
+    renderHistory();
   </script>
 </body>
 </html>
